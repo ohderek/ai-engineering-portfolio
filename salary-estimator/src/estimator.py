@@ -101,29 +101,43 @@ _SALARY_SCHEMA = {
 # ── Prompts ────────────────────────────────────────────────────────────────────
 
 _CONFIDENCE_RUBRIC = """
-CONFIDENCE SCORING — use a points-based approach. Do NOT default to 70-75%.
+CONFIDENCE SCORING — mechanical points-based system. Apply each rule exactly once. Same input must always produce the same score.
 
-Start at 50 points (no usable information), then add or subtract:
+Start at 50 points, then apply each applicable modifier:
 
-ADD points:
-  +20  Role is high-volume and well-documented (SWE, PM, sales, marketing, finance, ops, HR, legal)
-  +15  Major metro with abundant public salary data (NYC, SF/Bay Area, Seattle, London, Dublin,
-       Amsterdam, Berlin, Paris, Sydney, Singapore, Toronto, Austin, Boston, Chicago, LA)
-  +10  Seniority is unambiguous (explicit level e.g. "L5", "VP", "Senior", or clear years range ≤2 yrs)
-  +8   Industry has transparent comp culture (tech, finance, consulting, law, pharma)
-  +7   Company type is identifiable (named enterprise, known FAANG-tier, or stated funding stage)
+ADD points (each applied at most once):
+  +20  Role title is high-volume with abundant survey data: SWE/engineer, product manager, data analyst/scientist,
+       HR/people ops, sales/account executive, finance/accounting, marketing, legal, operations, recruiter
+  +15  Location is a Tier-1 comp data city: NYC, SF/Bay Area, Seattle, Boston, LA, Chicago, Austin, Toronto,
+       Vancouver, London, Dublin, Amsterdam, Berlin, Paris, Stockholm, Zurich, Sydney, Singapore, Hong Kong, Tokyo
+  +10  Seniority signal is unambiguous: explicit level code (L4, L5, IC3, VP), OR job title contains
+       "Senior"/"Staff"/"Principal"/"Director"/"Manager" AND years of experience range is ≤3 years wide
+  +8   Industry has transparent comp benchmarks published publicly: tech, finance/banking, consulting, law, pharma/biotech
+  +7   Employer is identifiable AND tier is clear: named Fortune-500/enterprise, known tech company, or
+       explicitly stated funding stage (Series A, B, C, public)
 
-SUBTRACT points:
-  -15  Seniority is ambiguous (broad range like "3–10 years", generic title like "Specialist")
-  -10  Mid-tier or regional city (not a globally recognised tech/finance hub)
-  -10  Niche specialisation with few public comparables
-  -8   Industry with opaque comp norms (gov, non-profit, early-stage, creative industries)
-  -8   Location missing entirely
-  -5   Equity structure is unclear or startup stage unknown
+SUBTRACT points (each applied at most once):
+  -15  Seniority is ambiguous: years range >3 yrs wide (e.g. "3–10 years"), OR title is generic with no level
+       signal ("Specialist", "Associate", "Coordinator" with no qualifier)
+  -10  Location is Tier-2 or regional: any city NOT in the Tier-1 list above but still named
+       (e.g. Shannon, Cork, Manchester, Phoenix, Denver, Melbourne outside CBD, secondary Irish/UK cities)
+  -10  Role is niche with few public comparables (fewer than ~500 job postings publicly visible for exact spec)
+  -8   Industry has opaque comp norms: government, non-profit, NGO, early-stage pre-seed/seed startup, creative/media
+  -8   Location is entirely missing from the input
+  -5   Equity component exists but vesting/structure is unknown, OR startup stage is unstated
 
-Cap at 95. Floor at 40. Round to the nearest whole number.
-Most real inputs score between 52 and 89 — scores above 90 should be rare.
-State your arithmetic in confidence_rationale (e.g. "50 +20 +15 +10 −8 = 87")."""
+Rules:
+- Apply +15 OR -10 for location, never both (Tier-1 = +15, named Tier-2 = -10, missing = -8)
+- Apply +10 OR -15 for seniority, never both
+- Cap final score at 95. Floor at 40.
+- State arithmetic explicitly in confidence_rationale: "50 +20 +10 −10 = 70"
+- Do NOT round to multiples of 5. Use the exact arithmetic result.
+
+SALARY RANGE WIDTH — range must be calibrated to confidence:
+  Score 85–95: range width ≤ 10% of midpoint  (e.g. midpoint €75k → range €71k–€79k)
+  Score 65–84: range width ≤ 18% of midpoint  (e.g. midpoint €75k → range €68k–€82k)
+  Score 40–64: range width ≤ 30% of midpoint  (e.g. midpoint €75k → range €64k–€86k)
+A wide range paired with a high confidence score is a contradiction — avoid it."""
 
 
 _JOB_DESCRIPTION_SYSTEM = f"""You are a compensation benchmarking expert with deep knowledge of salary \
