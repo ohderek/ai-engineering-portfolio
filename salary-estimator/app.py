@@ -3,6 +3,8 @@ Salary Estimator — Streamlit UI
 """
 
 import streamlit as st
+import streamlit.components.v1 as components
+from html import escape
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -164,8 +166,11 @@ html, body, [class*="css"] {
 }
 ::placeholder { color: #c8d3e8 !important; }
 
-/* Button */
-.stButton > button {
+/* Button — aggressive overrides for both default and primary variant */
+.stButton > button,
+.stButton > button[kind="primary"],
+.stButton > button[data-testid],
+div[data-testid="stButton"] > button {
     background: linear-gradient(135deg, #3b6ef5 0%, #2251d3 100%) !important;
     color: #ffffff !important;
     border: none !important;
@@ -178,10 +183,18 @@ html, body, [class*="css"] {
     transition: all 0.15s !important;
     box-shadow: 0 4px 14px rgba(59,110,245,0.3) !important;
 }
-.stButton > button:hover {
+.stButton > button p,
+.stButton > button span,
+div[data-testid="stButton"] > button p,
+div[data-testid="stButton"] > button span {
+    color: #ffffff !important;
+}
+.stButton > button:hover,
+div[data-testid="stButton"] > button:hover {
     background: linear-gradient(135deg, #4f7ef7 0%, #3060e8 100%) !important;
     box-shadow: 0 6px 20px rgba(59,110,245,0.4) !important;
     transform: translateY(-1px) !important;
+    color: #ffffff !important;
 }
 .stButton > button:active { transform: translateY(0) !important; }
 
@@ -286,7 +299,7 @@ def _items_html(items: list[str], label: str, icon: str) -> str:
     if not items:
         return ""
     lis = "".join(
-        f'<li style="padding:0.35rem 0; color:#64748b; border-bottom:1px solid #f1f5f9; font-size:0.82rem; font-family:DM Sans,sans-serif">{i}</li>'
+        f'<li style="padding:0.35rem 0; color:#64748b; border-bottom:1px solid #f1f5f9; font-size:0.82rem; font-family:DM Sans,sans-serif">{escape(i)}</li>'
         for i in items
     )
     return f"""
@@ -306,7 +319,7 @@ def display_results(estimate) -> None:
     base  = fmt_range(estimate.base_salary.low,  estimate.base_salary.high,  estimate.currency)
     total = fmt_range(estimate.total_compensation.low, estimate.total_compensation.high, estimate.currency)
     bonus_val  = fmt_range(estimate.annual_bonus.low, estimate.annual_bonus.high, estimate.currency) if estimate.annual_bonus else "—"
-    bonus_note = estimate.bonus_note or ("" if estimate.annual_bonus else "Not typical for this role")
+    bonus_note = escape(estimate.bonus_note or ("" if estimate.annual_bonus else "Not typical for this role"))
 
     equity_html = ""
     if estimate.equity_note:
@@ -315,13 +328,31 @@ def display_results(estimate) -> None:
             padding:0.75rem 1rem; margin-bottom:1.25rem; display:flex; align-items:center; gap:0.75rem">
   <span style="font-size:0.62rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase;
                color:#94a3b8; white-space:nowrap; font-family:'DM Sans',sans-serif">Equity</span>
-  <span style="font-size:0.84rem; color:#475569; font-family:'DM Sans',sans-serif">{estimate.equity_note}</span>
+  <span style="font-size:0.84rem; color:#475569; font-family:'DM Sans',sans-serif">{escape(estimate.equity_note)}</span>
 </div>"""
 
-    st.markdown(f"""
+    items_html = _items_html(estimate.key_factors, "Key Factors", "&#9702;") + \
+                 _items_html(estimate.caveats, "Caveats", "&#9651;")
+
+    # Estimate dynamic height: base card + equity row + items
+    n_items = len(estimate.key_factors) + len(estimate.caveats)
+    height = 600 + (80 if estimate.equity_note else 0) + n_items * 30
+
+    html = f"""<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+  body {{ background: transparent; font-family: 'DM Sans', sans-serif; padding: 4px 0; }}
+  details summary {{ list-style: none; }}
+  details summary::-webkit-details-marker {{ display: none; }}
+</style>
+</head>
+<body>
 <div style="background:#ffffff; border:1.5px solid #e8eef8; border-radius:12px;
-            padding:1.75rem; margin-top:1.5rem;
-            box-shadow: 0 4px 24px rgba(59,110,245,0.07), 0 1px 3px rgba(0,0,0,0.04)">
+            padding:1.75rem; box-shadow: 0 4px 24px rgba(59,110,245,0.07), 0 1px 3px rgba(0,0,0,0.04)">
 
   <!-- Header -->
   <div style="display:flex; justify-content:space-between; align-items:flex-start;
@@ -329,14 +360,14 @@ def display_results(estimate) -> None:
     <div>
       <div style="font-family:'Bricolage Grotesque',sans-serif; font-size:1.3rem; font-weight:800;
                   letter-spacing:-0.02em; color:#0f1a35; line-height:1.2; margin-bottom:0.3rem">
-        {estimate.role_title}
+        {escape(estimate.role_title)}
       </div>
       <div style="font-size:0.75rem; color:#94a3b8; letter-spacing:0.02em; font-family:'DM Sans',sans-serif">
-        📍 {estimate.location} &nbsp;·&nbsp; {estimate.seniority_level}
+        &#128205; {escape(estimate.location)} &nbsp;&middot;&nbsp; {escape(estimate.seniority_level)}
       </div>
     </div>
     <div style="background:{pill_bg}; border:1.5px solid {bar_col}; border-radius:10px;
-                padding:0.45rem 0.9rem; text-align:center; flex-shrink:0">
+                padding:0.45rem 0.9rem; text-align:center; flex-shrink:0; margin-left:1rem">
       <div style="font-family:'DM Mono',monospace; font-size:1.1rem; font-weight:500;
                   color:{fg}; line-height:1">{estimate.confidence_pct}%</div>
       <div style="font-size:0.6rem; color:{fg}; opacity:0.8; letter-spacing:0.06em;
@@ -386,16 +417,18 @@ def display_results(estimate) -> None:
                   color:#94a3b8; font-family:'DM Sans',sans-serif; margin-bottom:0.5rem">Analysis</div>
       <div style="font-size:0.82rem; color:#475569; line-height:1.65; font-style:italic;
                   font-family:'DM Sans',sans-serif">
-        {estimate.confidence_rationale}
+        {escape(estimate.confidence_rationale)}
       </div>
     </div>
   </div>
 
-  {_items_html(estimate.key_factors, "Key Factors", "◦")}
-  {_items_html(estimate.caveats, "Caveats", "△")}
+  {items_html}
 
 </div>
-""", unsafe_allow_html=True)
+</body>
+</html>"""
+
+    components.html(html, height=height, scrolling=False)
 
 
 # ── Tabs ───────────────────────────────────────────────────────────────────────
