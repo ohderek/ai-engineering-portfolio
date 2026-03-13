@@ -198,6 +198,23 @@ div[data-testid="stButton"] > button:hover {
 }
 .stButton > button:active { transform: translateY(0) !important; }
 
+/* Clear button — secondary style */
+.stButton > button[kind="secondary"],
+button[data-testid*="clear"] {
+    background: transparent !important;
+    color: #94a3b8 !important;
+    border: 1.5px solid #e2e8f2 !important;
+    box-shadow: none !important;
+}
+.stButton > button[kind="secondary"]:hover,
+button[data-testid*="clear"]:hover {
+    background: #f8faff !important;
+    color: #64748b !important;
+    border-color: #cbd5e1 !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
 /* Tabs */
 .stTabs [data-baseweb="tab-list"] {
     background: transparent !important;
@@ -476,7 +493,18 @@ with tab1:
         key="jd_location",
     )
 
-    if st.button("Estimate Salary →", key="jd_submit", type="primary", use_container_width=True):
+    btn_col, clear_col = st.columns([4, 1])
+    with btn_col:
+        submit_jd = st.button("Estimate Salary →", key="jd_submit", type="primary", use_container_width=True)
+    with clear_col:
+        clear_jd = st.button("Clear", key="jd_clear", use_container_width=True)
+
+    if clear_jd:
+        for k in ("jd_url", "jd_input", "jd_location", "jd_result"):
+            st.session_state.pop(k, None)
+        st.rerun()
+
+    if submit_jd:
         try:
             content = ""
             if jd_url.strip():
@@ -537,7 +565,18 @@ with tab2:
         key="profile_location",
     )
 
-    if st.button("Estimate Current Salary →", key="profile_submit", type="primary", use_container_width=True):
+    btn_col2, clear_col2 = st.columns([4, 1])
+    with btn_col2:
+        submit_profile = st.button("Estimate Current Salary →", key="profile_submit", type="primary", use_container_width=True)
+    with clear_col2:
+        clear_profile = st.button("Clear", key="profile_clear", use_container_width=True)
+
+    if clear_profile:
+        for k in ("profile_url", "profile_input", "profile_location", "profile_result"):
+            st.session_state.pop(k, None)
+        st.rerun()
+
+    if submit_profile:
         try:
             content = ""
             if profile_url.strip():
