@@ -38,18 +38,37 @@ Structured Output           ← validated Pydantic models, YAML, review feedback
 
 ### [support-rag-bot](./support-rag-bot)
 
-A Retrieval-Augmented Generation (RAG) pipeline that turns any business document into a queryable support bot. Ingests a document once, then answers plain-English questions grounded in the document content.
+A Retrieval-Augmented Generation (RAG) pipeline that turns any document or folder of documents into a queryable support bot. Ingests once, then answers plain-English questions grounded in the content.
 
 **Features:**
-- `ingest` — Load, chunk, embed, and store a document in a local vector database
+- `ingest` — Load, chunk, embed, and store a document or folder of `.md` files in a local vector database
 - `ask` — Ask a single question with optional source chunk citations
-- `chat` — Interactive Q&A session against the ingested document
+- `chat` — Interactive Q&A session via CLI
+- Streamlit UI — browser-based chat interface (`streamlit run app.py`)
 
 **Key techniques:** document chunking · local embeddings (HuggingFace) · vector store (Chroma) · RAG · LangChain LCEL · prompt templates
 
 **Runs with:** Anthropic API for the LLM; HuggingFace embeddings run locally (no key needed)
 
 → [README](./support-rag-bot/README.md)
+
+---
+
+### [salary-estimator](./salary-estimator)
+
+A hypothetical compensation intelligence tool that estimates salary ranges for job postings and candidate profiles. Accepts URLs or pasted text and returns structured estimates with confidence scores.
+
+**Features:**
+- Paste a job posting URL (Greenhouse, Lever, Workday, Indeed, LinkedIn Jobs) or text → estimate what the role pays
+- Paste a LinkedIn profile URL or CV text → estimate what a candidate currently earns
+- Location auto-detected or manually entered
+- Returns base salary, bonus, equity, and total comp ranges with a confidence score and rationale
+
+**Key techniques:** structured outputs with JSON schema · adaptive thinking · Playwright browser automation · httpx + BeautifulSoup scraping · Pydantic validation
+
+**Runs with:** Anthropic API (Claude Opus 4.6)
+
+→ [README](./salary-estimator/README.md)
 
 ---
 
@@ -64,4 +83,7 @@ A Retrieval-Augmented Generation (RAG) pipeline that turns any business document
 | Validation | Pydantic v2 |
 | CLI | Typer |
 | Terminal UI | Rich |
+| Web UI | Streamlit |
+| Web scraping | httpx + BeautifulSoup4 |
+| Browser automation | Playwright (headless Chromium) |
 | Language | Python 3.13 |

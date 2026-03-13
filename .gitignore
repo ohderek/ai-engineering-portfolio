@@ -1,0 +1,18 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# Environment
+.env
+
+# LinkedIn session (contains auth cookies — never commit)
+.linkedin_session.json
+
+# Vector store (generated at runtime)
+support-rag-bot/vector_db/
+
+# macOS
+.DS_Store

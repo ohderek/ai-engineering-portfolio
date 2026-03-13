@@ -19,10 +19,10 @@ Key concepts demonstrated:
 
 from pathlib import Path
 
-from langchain_community.document_loaders import TextLoader
+from langchain_community.document_loaders import TextLoader, DirectoryLoader
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from rich.console import Console
 from rich.progress import track
 
@@ -42,12 +42,16 @@ def ingest(file_path: str) -> Chroma:
     """
     path = Path(file_path)
     if not path.exists():
-        raise FileNotFoundError(f"Document not found: {file_path}")
+        raise FileNotFoundError(f"Path not found: {file_path}")
 
-    console.print(f"\n[bold cyan]Loading:[/bold cyan] {path.name}")
+    console.print(f"\n[bold cyan]Loading:[/bold cyan] {path}")
 
     # ── 1. Load ───────────────────────────────────────────────────────────────
-    loader = TextLoader(str(path))
+    if path.is_dir():
+        loader = DirectoryLoader(str(path), glob="**/*.md", loader_cls=TextLoader,
+                                 loader_kwargs={"autodetect_encoding": True})
+    else:
+        loader = TextLoader(str(path), autodetect_encoding=True)
     documents = loader.load()
     console.print(f"  Loaded {len(documents)} document(s)")
 

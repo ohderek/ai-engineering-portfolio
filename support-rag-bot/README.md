@@ -13,16 +13,16 @@
 
 ```mermaid
 flowchart LR
-    A["Source document\n(.txt / .pdf)"] --> B
+    A["Source document\n(.txt / .md)\nor folder of .md files"] --> B
 
     subgraph B["Ingestion Pipeline — runs once"]
         direction TB
-        B1["1. Load\nTextLoader"] --> B2["2. Chunk\nRecursiveCharacterTextSplitter\nsize=500  overlap=50"]
+        B1["1. Load\nTextLoader / DirectoryLoader"] --> B2["2. Chunk\nRecursiveCharacterTextSplitter\nsize=500  overlap=50"]
         B2 --> B3["3. Embed\nHuggingFace all-MiniLM-L6-v2\nruns locally — no API key"]
         B3 --> B4["4. Store\nChroma vector DB\npersisted to disk"]
     end
 
-    E["User question"] --> F
+    E["User question\n(CLI or Streamlit UI)"] --> F
 
     subgraph F["Query Pipeline — runs on every question"]
         direction TB
@@ -181,16 +181,41 @@ python main.py ask "What happens to my data if I delete my workspace?"
 
 ---
 
-## Using your own document
+## Using your own documents
 
-The bot works with any `.txt` file. To use your own document:
+The bot works with any `.txt` or `.md` file, or a folder of `.md` files:
 
 ```bash
+# Single file
 python main.py ingest path/to/your_document.txt
+
+# Folder of markdown files (recursive — picks up all .md files)
+python main.py ingest path/to/docs/
+
+# Absolute path outside the project
+python main.py ingest /Users/you/notion-export/
+
 python main.py ask "your question"
 ```
 
 Re-running `ingest` replaces the existing vector store.
+
+---
+
+## Streamlit UI
+
+A browser-based chat interface is available alongside the CLI:
+
+```bash
+streamlit run app.py
+```
+
+Open **http://localhost:8501**
+
+- Sidebar: enter a file or folder path and click **Ingest**
+- Chat input at the bottom for questions
+- Toggle **Show source chunks** to see which document sections were used
+- Auto-detects an existing vector store on startup (no need to re-ingest)
 
 ---
 
@@ -204,3 +229,4 @@ Re-running `ingest` replaces the existing vector store.
 | Vector store | [Chroma](https://www.trychroma.com/) | Local, open source, persisted to disk |
 | CLI | [Typer](https://typer.tiangolo.com/) | |
 | Terminal UI | [Rich](https://rich.readthedocs.io/) | |
+| Web UI | [Streamlit](https://streamlit.io/) | `streamlit run app.py` |

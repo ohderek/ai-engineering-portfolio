@@ -2,8 +2,9 @@
 Support RAG Bot — CLI entry point.
 
 Usage:
-  # Step 1: ingest a document (run once)
+  # Step 1: ingest a document or folder of .md files (run once)
   python main.py ingest data/flowdesk_faq.txt
+  python main.py ingest data/docs/
 
   # Step 2: ask a single question
   python main.py ask "How do I cancel my subscription?"
@@ -27,14 +28,14 @@ console = Console()
 
 @app.command()
 def ingest(
-    file: Path = typer.Argument(..., help="Path to the document to ingest (.txt)"),
+    path: Path = typer.Argument(..., help="Path to a .txt/.md file or a folder of .md files"),
 ) -> None:
     """
-    Load, chunk, embed, and store a document in the local vector database.
-    Run this once before using 'ask' or 'chat'.
+    Load, chunk, embed, and store documents in the local vector database.
+    Accepts a single file or a folder of .md files. Run once before using 'ask' or 'chat'.
     """
     from src.ingest import ingest as run_ingest
-    run_ingest(str(file))
+    run_ingest(str(path))
     console.print("[bold green]Ingestion complete.[/bold green] "
                   "You can now run: python main.py ask \"your question\"")
 
