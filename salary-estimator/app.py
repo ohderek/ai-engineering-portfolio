@@ -9,8 +9,6 @@ load_dotenv()
 
 st.set_page_config(page_title="CompIQ", page_icon="◈", layout="centered")
 
-# ── Globals ────────────────────────────────────────────────────────────────────
-
 CURRENCY_SYMBOLS = {
     "USD": "$", "GBP": "£", "EUR": "€",
     "CAD": "CA$", "AUD": "A$", "SGD": "S$",
@@ -30,12 +28,17 @@ st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Space+Mono:wght@400;700&display=swap');
 
-/* ── Base ─────────────────────────────────────────── */
+/* ── Base & background ────────────────────────────── */
 html, body, [class*="css"] {
     font-family: 'Instrument Sans', sans-serif !important;
 }
 .stApp {
-    background: #080b12 !important;
+    background-color: #060d1a !important;
+    background-image:
+        radial-gradient(ellipse 80% 40% at 50% 0%, rgba(0,180,255,0.07) 0%, transparent 70%),
+        linear-gradient(rgba(0,180,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,180,255,0.025) 1px, transparent 1px) !important;
+    background-size: auto, 48px 48px, 48px 48px !important;
 }
 .block-container {
     max-width: 760px !important;
@@ -45,94 +48,93 @@ html, body, [class*="css"] {
 #MainMenu, footer, header { visibility: hidden !important; }
 .stDeployButton { display: none !important; }
 
+/* ── Text defaults ────────────────────────────────── */
+p, li, span, div { color: #8ba4c0; }
+
 /* ── Inputs ───────────────────────────────────────── */
 .stTextInput input,
 .stTextArea textarea {
-    background: #0f1420 !important;
-    border: 1px solid #1e2535 !important;
-    color: #d4d8e8 !important;
+    background: rgba(6, 18, 36, 0.8) !important;
+    border: 1px solid rgba(0,180,255,0.12) !important;
+    color: #c8dff0 !important;
     border-radius: 6px !important;
     font-family: 'Instrument Sans', sans-serif !important;
     font-size: 0.875rem !important;
     transition: border-color 0.2s, box-shadow 0.2s !important;
-    caret-color: #e8c547 !important;
+    caret-color: #00cfff !important;
 }
 .stTextInput input:focus,
 .stTextArea textarea:focus {
-    border-color: #e8c547 !important;
-    box-shadow: 0 0 0 3px rgba(232,197,71,0.08) !important;
+    border-color: rgba(0,207,255,0.5) !important;
+    box-shadow: 0 0 0 3px rgba(0,207,255,0.06), 0 0 16px rgba(0,207,255,0.06) !important;
     outline: none !important;
 }
 .stTextInput label,
 .stTextArea label {
-    color: #4a5270 !important;
-    font-size: 0.7rem !important;
+    color: rgba(0,180,255,0.45) !important;
+    font-size: 0.68rem !important;
     font-weight: 600 !important;
-    letter-spacing: 0.1em !important;
+    letter-spacing: 0.12em !important;
     text-transform: uppercase !important;
     font-family: 'Instrument Sans', sans-serif !important;
 }
-::placeholder { color: #2a3048 !important; }
+::placeholder { color: rgba(0,150,220,0.2) !important; }
 
 /* ── Button ───────────────────────────────────────── */
 .stButton > button {
-    background: #e8c547 !important;
-    color: #080b12 !important;
+    background: linear-gradient(135deg, #00cfff 0%, #0090e0 100%) !important;
+    color: #030912 !important;
     border: none !important;
     border-radius: 6px !important;
     font-family: 'Syne', sans-serif !important;
     font-weight: 700 !important;
     font-size: 0.85rem !important;
-    letter-spacing: 0.06em !important;
-    padding: 0.6rem 1.4rem !important;
-    transition: background 0.15s, transform 0.1s, box-shadow 0.15s !important;
+    letter-spacing: 0.08em !important;
+    padding: 0.65rem 1.4rem !important;
+    transition: all 0.15s !important;
+    box-shadow: 0 0 20px rgba(0,207,255,0.2) !important;
 }
 .stButton > button:hover {
-    background: #f2d458 !important;
+    background: linear-gradient(135deg, #33daff 0%, #00aaf0 100%) !important;
+    box-shadow: 0 0 32px rgba(0,207,255,0.35) !important;
     transform: translateY(-1px) !important;
-    box-shadow: 0 6px 24px rgba(232,197,71,0.2) !important;
 }
-.stButton > button:active {
-    transform: translateY(0) !important;
-}
+.stButton > button:active { transform: translateY(0) !important; }
 
 /* ── Tabs ─────────────────────────────────────────── */
 .stTabs [data-baseweb="tab-list"] {
     background: transparent !important;
-    border-bottom: 1px solid #1e2535 !important;
+    border-bottom: 1px solid rgba(0,180,255,0.1) !important;
     gap: 0 !important;
     margin-bottom: 1.75rem !important;
 }
 .stTabs [data-baseweb="tab"] {
     background: transparent !important;
-    color: #3a4260 !important;
+    color: rgba(0,150,200,0.35) !important;
     font-family: 'Instrument Sans', sans-serif !important;
-    font-size: 0.825rem !important;
+    font-size: 0.75rem !important;
     font-weight: 600 !important;
-    letter-spacing: 0.05em !important;
+    letter-spacing: 0.1em !important;
     padding: 0.75rem 1.25rem !important;
     border-bottom: 2px solid transparent !important;
     text-transform: uppercase !important;
     transition: color 0.15s !important;
 }
 .stTabs [aria-selected="true"] {
-    color: #d4d8e8 !important;
-    border-bottom: 2px solid #e8c547 !important;
+    color: #00cfff !important;
+    border-bottom: 2px solid #00cfff !important;
+    text-shadow: 0 0 12px rgba(0,207,255,0.4) !important;
 }
 
 /* ── Spinner ──────────────────────────────────────── */
-.stSpinner p { color: #4a5270 !important; font-size: 0.8rem !important; }
+.stSpinner p { color: rgba(0,180,255,0.4) !important; font-size: 0.78rem !important; }
 
 /* ── Alerts ───────────────────────────────────────── */
 .stAlert {
-    background: #0f1420 !important;
-    border: 1px solid #1e2535 !important;
+    background: rgba(6,18,36,0.9) !important;
+    border: 1px solid rgba(0,180,255,0.15) !important;
     border-radius: 6px !important;
-    color: #d4d8e8 !important;
 }
-
-/* ── Body text ────────────────────────────────────── */
-p, li { color: #4a5270 !important; font-size: 0.85rem !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -140,14 +142,15 @@ p, li { color: #4a5270 !important; font-size: 0.85rem !important; }
 # ── Header ─────────────────────────────────────────────────────────────────────
 
 st.markdown("""
-<div style="margin-bottom:2.5rem; padding-bottom:1.75rem; border-bottom:1px solid #1e2535">
-  <div style="font-family:'Syne',sans-serif; font-size:2.2rem; font-weight:800;
-              letter-spacing:-0.04em; color:#d4d8e8; line-height:1; margin-bottom:0.5rem">
-    Comp<span style="color:#e8c547">IQ</span>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<div style="margin-bottom:2.5rem; padding-bottom:1.75rem; border-bottom:1px solid rgba(0,180,255,0.1)">
+  <div style="font-family:'Syne',sans-serif; font-size:2.4rem; font-weight:800;
+              letter-spacing:-0.04em; color:#e0f0ff; line-height:1; margin-bottom:0.5rem">
+    Comp<span style="color:#00cfff; text-shadow:0 0 24px rgba(0,207,255,0.6), 0 0 48px rgba(0,207,255,0.2)">IQ</span>
   </div>
-  <div style="font-size:0.78rem; color:#3a4260; letter-spacing:0.08em; text-transform:uppercase;
-              font-family:'Instrument Sans',sans-serif; font-weight:600">
-    Compensation intelligence &nbsp;·&nbsp; Powered by Claude
+  <div style="font-size:0.68rem; color:rgba(0,160,210,0.45); letter-spacing:0.14em;
+              text-transform:uppercase; font-family:'Instrument Sans',sans-serif; font-weight:600">
+    Compensation intelligence &nbsp;/&nbsp; Powered by Claude
   </div>
 </div>
 """, unsafe_allow_html=True)
@@ -155,149 +158,140 @@ st.markdown("""
 
 # ── Results card ───────────────────────────────────────────────────────────────
 
-def _conf_class(pct: int) -> str:
-    if pct >= 80: return "high"
-    if pct >= 60: return "med"
-    return "low"
+def _conf_props(pct: int):
+    if pct >= 80:
+        return "#00ff99", "rgba(0,255,153,0.07)", "rgba(0,255,153,0.2)", "High confidence"
+    if pct >= 60:
+        return "#fbbf24", "rgba(251,191,36,0.07)", "rgba(251,191,36,0.2)", "Medium confidence"
+    return "#ff4d6d", "rgba(255,77,109,0.07)", "rgba(255,77,109,0.2)", "Low confidence"
 
-def _conf_label(pct: int) -> str:
-    if pct >= 80: return "High confidence"
-    if pct >= 60: return "Medium confidence"
-    return "Low confidence"
 
-def _conf_color(cls: str) -> str:
-    return {"high": "#34d399", "med": "#fb923c", "low": "#f87171"}[cls]
-
-def _conf_bg(cls: str) -> str:
-    return {"high": "rgba(52,211,153,0.07)", "med": "rgba(251,146,60,0.07)", "low": "rgba(248,113,113,0.07)"}[cls]
-
-def _conf_border(cls: str) -> str:
-    return {"high": "rgba(52,211,153,0.25)", "med": "rgba(251,146,60,0.25)", "low": "rgba(248,113,113,0.25)"}[cls]
-
-def _factors_html(items: list[str], icon: str, label: str) -> str:
+def _items_html(items: list[str], icon: str, label: str) -> str:
     if not items:
         return ""
-    lis = "".join(f'<li style="padding:0.25rem 0; color:#4a5270; border-bottom:1px solid #1a1f2e">{i}</li>' for i in items)
+    lis = "".join(
+        f'<li style="padding:0.3rem 0; color:rgba(140,180,210,0.7); '
+        f'border-bottom:1px solid rgba(0,180,255,0.06); font-size:0.82rem">{i}</li>'
+        for i in items
+    )
     return f"""
 <details style="margin-top:0.75rem">
-  <summary style="cursor:pointer; font-size:0.68rem; font-weight:600; letter-spacing:0.1em;
-                  text-transform:uppercase; color:#2e3550; padding:0.6rem 0; list-style:none;
-                  display:flex; align-items:center; gap:0.4rem; user-select:none">
-    <span style="color:#2e3550">{icon}</span> {label}
+  <summary style="cursor:pointer; font-size:0.65rem; font-weight:600; letter-spacing:0.12em;
+                  text-transform:uppercase; color:rgba(0,160,210,0.4); padding:0.65rem 0;
+                  list-style:none; user-select:none; display:flex; align-items:center; gap:0.4rem;
+                  font-family:'Instrument Sans',sans-serif">
+    <span>{icon}</span> {label}
   </summary>
-  <ul style="margin:0.5rem 0 0; padding:0 0 0 0.25rem; list-style:none; font-size:0.82rem;
-             font-family:'Instrument Sans',sans-serif">
+  <ul style="margin:0.4rem 0 0; padding:0; list-style:none; font-family:'Instrument Sans',sans-serif">
     {lis}
   </ul>
 </details>"""
 
 
 def display_results(estimate) -> None:
-    cc = _conf_class(estimate.confidence_pct)
-    col = _conf_color(cc)
-    bg  = _conf_bg(cc)
-    bdr = _conf_border(cc)
-    bar_pct = estimate.confidence_pct
+    col, bg, bdr, conf_label = _conf_props(estimate.confidence_pct)
 
-    # Salary figures
-    base  = fmt_range(estimate.base_salary.low, estimate.base_salary.high, estimate.currency)
+    base  = fmt_range(estimate.base_salary.low,  estimate.base_salary.high,  estimate.currency)
     total = fmt_range(estimate.total_compensation.low, estimate.total_compensation.high, estimate.currency)
 
     if estimate.annual_bonus:
         bonus_val = fmt_range(estimate.annual_bonus.low, estimate.annual_bonus.high, estimate.currency)
-        bonus_note_html = f'<div style="font-size:0.7rem;color:#2e3550;margin-top:0.3rem;font-style:italic">{estimate.bonus_note or ""}</div>'
     else:
         bonus_val = "—"
-        bonus_note_html = f'<div style="font-size:0.7rem;color:#2e3550;margin-top:0.3rem;font-style:italic">{estimate.bonus_note or "Not typical"}</div>'
+    bonus_note = estimate.bonus_note or ("" if estimate.annual_bonus else "Not typical")
 
     equity_html = ""
     if estimate.equity_note:
         equity_html = f"""
-<div style="background:#0c1018; border:1px solid #1e2535; border-radius:6px;
-            padding:0.7rem 1rem; margin-bottom:1.25rem; display:flex; align-items:center; gap:0.75rem">
-  <span style="font-size:0.65rem; font-weight:600; letter-spacing:0.1em; text-transform:uppercase;
-               color:#2e3550; white-space:nowrap; font-family:'Instrument Sans',sans-serif">Equity</span>
-  <span style="font-size:0.85rem; color:#6b7a9e; font-family:'Instrument Sans',sans-serif">{estimate.equity_note}</span>
+<div style="background:rgba(0,10,24,0.6); border:1px solid rgba(0,180,255,0.1);
+            border-radius:6px; padding:0.65rem 1rem; margin-bottom:1.25rem;
+            display:flex; align-items:center; gap:0.75rem">
+  <span style="font-size:0.62rem; font-weight:600; letter-spacing:0.12em; text-transform:uppercase;
+               color:rgba(0,160,210,0.4); white-space:nowrap; font-family:'Instrument Sans',sans-serif">Equity</span>
+  <span style="font-size:0.84rem; color:rgba(140,180,210,0.8); font-family:'Instrument Sans',sans-serif">{estimate.equity_note}</span>
 </div>"""
 
-    factors_html = _factors_html(estimate.key_factors, "◦", "Key factors")
-    caveats_html  = _factors_html(estimate.caveats,     "⚠", "Caveats")
-
     st.markdown(f"""
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<div style="background:rgba(8,16,32,0.85); border:1px solid rgba(0,180,255,0.14);
+            border-radius:10px; padding:1.75rem; margin-top:1.5rem;
+            box-shadow:0 0 40px rgba(0,150,255,0.04), inset 0 1px 0 rgba(0,207,255,0.06);
+            font-family:'Instrument Sans',sans-serif">
 
-<div style="background:#0c1018; border:1px solid #1e2535; border-radius:10px;
-            padding:1.75rem; margin-top:1.5rem; font-family:'Instrument Sans',sans-serif">
-
-  <!-- Header row -->
+  <!-- Header -->
   <div style="display:flex; justify-content:space-between; align-items:flex-start;
-              margin-bottom:1.5rem; padding-bottom:1.5rem; border-bottom:1px solid #1a1f2e">
+              margin-bottom:1.5rem; padding-bottom:1.5rem; border-bottom:1px solid rgba(0,180,255,0.08)">
     <div>
-      <div style="font-family:'Syne',sans-serif; font-size:1.35rem; font-weight:800;
-                  letter-spacing:-0.02em; color:#d4d8e8; line-height:1.2; margin-bottom:0.35rem">
+      <div style="font-family:'Syne',sans-serif; font-size:1.3rem; font-weight:800;
+                  letter-spacing:-0.02em; color:#d8ecff; line-height:1.2; margin-bottom:0.35rem">
         {estimate.role_title}
       </div>
-      <div style="font-size:0.75rem; color:#3a4260; letter-spacing:0.04em">
-        📍 {estimate.location} &nbsp;·&nbsp; {estimate.seniority_level}
+      <div style="font-size:0.73rem; color:rgba(0,160,210,0.45); letter-spacing:0.04em">
+        ◎ {estimate.location} &nbsp;·&nbsp; {estimate.seniority_level}
       </div>
     </div>
-    <div style="background:{bg}; border:1px solid {bdr}; border-radius:100px;
-                padding:0.35rem 0.85rem; text-align:center; white-space:nowrap; flex-shrink:0">
-      <div style="font-family:'Space Mono',monospace; font-size:1rem; font-weight:700; color:{col};
-                  line-height:1">{estimate.confidence_pct}%</div>
-      <div style="font-size:0.6rem; color:{col}; opacity:0.75; letter-spacing:0.06em;
-                  text-transform:uppercase; margin-top:0.15rem">{_conf_label(estimate.confidence_pct)}</div>
+    <div style="background:{bg}; border:1px solid {bdr}; border-radius:8px;
+                padding:0.4rem 0.9rem; text-align:center; white-space:nowrap; flex-shrink:0;
+                box-shadow:0 0 16px {bdr}">
+      <div style="font-family:'Space Mono',monospace; font-size:1.1rem; font-weight:700;
+                  color:{col}; line-height:1; text-shadow:0 0 12px {col}40">{estimate.confidence_pct}%</div>
+      <div style="font-size:0.58rem; color:{col}; opacity:0.7; letter-spacing:0.08em;
+                  text-transform:uppercase; margin-top:0.18rem">{conf_label}</div>
     </div>
   </div>
 
   <!-- Comp grid -->
-  <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.75rem; margin-bottom:1.25rem">
+  <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.7rem; margin-bottom:1.25rem">
 
-    <div style="background:#080b12; border:1px solid #1a1f2e; border-radius:6px; padding:1rem">
-      <div style="font-size:0.62rem; font-weight:600; letter-spacing:0.12em; text-transform:uppercase;
-                  color:#2e3550; margin-bottom:0.45rem">Base Salary</div>
+    <div style="background:rgba(0,10,24,0.6); border:1px solid rgba(0,180,255,0.08);
+                border-radius:6px; padding:1rem">
+      <div style="font-size:0.6rem; font-weight:600; letter-spacing:0.12em; text-transform:uppercase;
+                  color:rgba(0,160,210,0.35); margin-bottom:0.45rem">Base Salary</div>
       <div style="font-family:'Space Mono',monospace; font-size:0.95rem; font-weight:700;
-                  color:#c4c8d8; line-height:1.2">{base}</div>
+                  color:#b8d4ee; line-height:1.2">{base}</div>
     </div>
 
-    <div style="background:#080b12; border:1px solid #1a1f2e; border-radius:6px; padding:1rem">
-      <div style="font-size:0.62rem; font-weight:600; letter-spacing:0.12em; text-transform:uppercase;
-                  color:#2e3550; margin-bottom:0.45rem">Annual Bonus</div>
+    <div style="background:rgba(0,10,24,0.6); border:1px solid rgba(0,180,255,0.08);
+                border-radius:6px; padding:1rem">
+      <div style="font-size:0.6rem; font-weight:600; letter-spacing:0.12em; text-transform:uppercase;
+                  color:rgba(0,160,210,0.35); margin-bottom:0.45rem">Annual Bonus</div>
       <div style="font-family:'Space Mono',monospace; font-size:0.95rem; font-weight:700;
-                  color:#c4c8d8; line-height:1.2">{bonus_val}</div>
-      {bonus_note_html}
+                  color:#b8d4ee; line-height:1.2">{bonus_val}</div>
+      <div style="font-size:0.68rem; color:rgba(0,140,180,0.4); margin-top:0.3rem; font-style:italic">{bonus_note}</div>
     </div>
 
-    <div style="background:#0f1a10; border:1px solid #1e3020; border-radius:6px; padding:1rem">
-      <div style="font-size:0.62rem; font-weight:600; letter-spacing:0.12em; text-transform:uppercase;
-                  color:#2e4a30; margin-bottom:0.45rem">Total Comp</div>
-      <div style="font-family:'Space Mono',monospace; font-size:0.95rem; font-weight:700;
-                  color:#e8c547; line-height:1.2">{total}</div>
+    <div style="background:rgba(0,20,40,0.7); border:1px solid rgba(0,207,255,0.2);
+                border-radius:6px; padding:1rem;
+                box-shadow:0 0 20px rgba(0,207,255,0.04), inset 0 1px 0 rgba(0,207,255,0.08)">
+      <div style="font-size:0.6rem; font-weight:600; letter-spacing:0.12em; text-transform:uppercase;
+                  color:rgba(0,207,255,0.4); margin-bottom:0.45rem">Total Comp</div>
+      <div style="font-family:'Space Mono',monospace; font-size:0.95rem; font-weight:700; color:#00cfff;
+                  line-height:1.2; text-shadow:0 0 12px rgba(0,207,255,0.3)">{total}</div>
     </div>
 
   </div>
 
-  <!-- Equity -->
   {equity_html}
 
   <!-- Confidence bar -->
-  <div style="border-top:1px solid #1a1f2e; padding-top:1.25rem">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem">
-      <span style="font-size:0.65rem; font-weight:600; letter-spacing:0.1em; text-transform:uppercase;
-                   color:#2e3550">Confidence</span>
-      <span style="font-family:'Space Mono',monospace; font-size:0.75rem; color:{col}">{estimate.confidence_pct}%</span>
+  <div style="border-top:1px solid rgba(0,180,255,0.08); padding-top:1.2rem">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.45rem">
+      <span style="font-size:0.62rem; font-weight:600; letter-spacing:0.12em; text-transform:uppercase;
+                   color:rgba(0,160,210,0.35); font-family:'Instrument Sans',sans-serif">Confidence</span>
+      <span style="font-family:'Space Mono',monospace; font-size:0.72rem; color:{col};
+                   text-shadow:0 0 8px {col}60">{estimate.confidence_pct}%</span>
     </div>
-    <div style="height:3px; background:#1a1f2e; border-radius:100px; overflow:hidden; margin-bottom:0.6rem">
-      <div style="height:100%; width:{bar_pct}%; background:{col}; border-radius:100px; opacity:0.7"></div>
+    <div style="height:2px; background:rgba(0,180,255,0.08); border-radius:100px;
+                overflow:hidden; margin-bottom:0.65rem">
+      <div style="height:100%; width:{estimate.confidence_pct}%; background:linear-gradient(90deg,{col}90,{col});
+                  border-radius:100px; box-shadow:0 0 8px {col}80"></div>
     </div>
-    <div style="font-size:0.78rem; color:#3a4260; line-height:1.55; font-style:italic">
+    <div style="font-size:0.77rem; color:rgba(100,150,190,0.65); line-height:1.55; font-style:italic">
       {estimate.confidence_rationale}
     </div>
   </div>
 
-  <!-- Expandable sections -->
-  {factors_html}
-  {caveats_html}
+  {_items_html(estimate.key_factors, "◦", "Key factors")}
+  {_items_html(estimate.caveats, "△", "Caveats")}
 
 </div>
 """, unsafe_allow_html=True)
@@ -308,7 +302,7 @@ def display_results(estimate) -> None:
 tab1, tab2 = st.tabs(["Job Description", "Candidate Profile"])
 
 with tab1:
-    st.markdown('<p style="color:#3a4260 !important; margin-bottom:1.25rem">For job seekers — paste a job posting URL or the description text to estimate what the role pays.</p>', unsafe_allow_html=True)
+    st.markdown('<p style="color:rgba(0,150,200,0.4) !important; margin-bottom:1.25rem; font-size:0.82rem">For job seekers — paste a job posting URL or the description text to estimate what the role pays.</p>', unsafe_allow_html=True)
 
     jd_url = st.text_input(
         "Job posting URL",
@@ -336,7 +330,6 @@ with tab1:
                     content = fetch_url(jd_url.strip())
             else:
                 content = jd_text
-
             if not content.strip():
                 st.error("Provide a URL or paste a job description.")
             else:
@@ -351,7 +344,7 @@ with tab1:
 
 
 with tab2:
-    st.markdown('<p style="color:#3a4260 !important; margin-bottom:1.25rem">For recruiters — paste a LinkedIn profile URL or CV text to estimate what a candidate currently earns.</p>', unsafe_allow_html=True)
+    st.markdown('<p style="color:rgba(0,150,200,0.4) !important; margin-bottom:1.25rem; font-size:0.82rem">For recruiters — paste a LinkedIn profile URL or CV text to estimate what a candidate currently earns.</p>', unsafe_allow_html=True)
 
     profile_url = st.text_input(
         "LinkedIn profile URL",
@@ -379,7 +372,6 @@ with tab2:
                     content = fetch_url(profile_url.strip())
             else:
                 content = profile_text
-
             if not content.strip():
                 st.error("Provide a URL or paste a candidate profile.")
             else:
