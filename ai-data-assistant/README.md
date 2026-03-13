@@ -1,8 +1,15 @@
 # AI Data Assistant
 
-> A showcase of a typical AI engineering data pipeline — taking raw inputs (SQL models, user queries), processing them through an LLM with carefully engineered prompts, and returning structured, actionable outputs.
+> A command-line AI assistant for data engineers. Point it at a SQL file to get an instant code review, generate dbt documentation without writing YAML by hand, or ask it data engineering questions in a persistent chat session.
 
-AI engineering is fundamentally about integrating pre-trained models into workflows that deliver business value. This project demonstrates that pattern end-to-end in a data engineering context:
+**When you'd use this:**
+- You've written a new dbt model and want a second opinion before committing
+- You need to document a SQL model but don't want to write `schema.yml` from scratch
+- You want a quick answer to a SQL, dbt, Snowflake, or Airflow question without leaving the terminal
+
+Each feature is a self-contained example of a different AI engineering pattern — streaming, few-shot prompting, and structured output validation — built directly on the Anthropic API with no framework abstraction in between.
+
+
 
 ```mermaid
 flowchart LR
