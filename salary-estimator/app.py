@@ -358,8 +358,9 @@ def display_results(estimate) -> None:
                  _items_html(estimate.caveats, "Caveats", "&#9651;")
 
     # Estimate dynamic height: base card + equity row + items
+    # Use 55px per item to account for text wrapping, plus generous base padding
     n_items = len(estimate.key_factors) + len(estimate.caveats)
-    height = 600 + (80 if estimate.equity_note else 0) + n_items * 30
+    height = 650 + (80 if estimate.equity_note else 0) + n_items * 55
 
     html = f"""<!DOCTYPE html>
 <html>
