@@ -198,19 +198,25 @@ div[data-testid="stButton"] > button:hover {
 }
 .stButton > button:active { transform: translateY(0) !important; }
 
-/* Clear button — secondary style */
-.stButton > button[kind="secondary"],
-button[data-testid*="clear"] {
-    background: transparent !important;
-    color: #94a3b8 !important;
-    border: 1.5px solid #e2e8f2 !important;
+/* Clear button — targets the second column's button via :last-of-type trick */
+div[data-testid="column"]:last-child .stButton > button,
+div[data-testid="column"]:last-child div[data-testid="stButton"] > button {
+    background: #f1f5f9 !important;
+    color: #475569 !important;
+    border: 1.5px solid #cbd5e1 !important;
     box-shadow: none !important;
+    font-weight: 600 !important;
 }
-.stButton > button[kind="secondary"]:hover,
-button[data-testid*="clear"]:hover {
-    background: #f8faff !important;
-    color: #64748b !important;
-    border-color: #cbd5e1 !important;
+div[data-testid="column"]:last-child .stButton > button p,
+div[data-testid="column"]:last-child .stButton > button span,
+div[data-testid="column"]:last-child div[data-testid="stButton"] > button p {
+    color: #475569 !important;
+}
+div[data-testid="column"]:last-child .stButton > button:hover,
+div[data-testid="column"]:last-child div[data-testid="stButton"] > button:hover {
+    background: #e2e8f0 !important;
+    color: #1e293b !important;
+    border-color: #94a3b8 !important;
     transform: none !important;
     box-shadow: none !important;
 }
@@ -500,8 +506,10 @@ with tab1:
         clear_jd = st.button("Clear", key="jd_clear", use_container_width=True)
 
     if clear_jd:
-        for k in ("jd_url", "jd_input", "jd_location", "jd_result"):
-            st.session_state.pop(k, None)
+        st.session_state["jd_url"] = ""
+        st.session_state["jd_input"] = ""
+        st.session_state["jd_location"] = ""
+        st.session_state.pop("jd_result", None)
         st.rerun()
 
     if submit_jd:
@@ -572,8 +580,10 @@ with tab2:
         clear_profile = st.button("Clear", key="profile_clear", use_container_width=True)
 
     if clear_profile:
-        for k in ("profile_url", "profile_input", "profile_location", "profile_result"):
-            st.session_state.pop(k, None)
+        st.session_state["profile_url"] = ""
+        st.session_state["profile_input"] = ""
+        st.session_state["profile_location"] = ""
+        st.session_state.pop("profile_result", None)
         st.rerun()
 
     if submit_profile:
