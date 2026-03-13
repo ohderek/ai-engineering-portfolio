@@ -22,6 +22,98 @@ def fmt_range(low: int, high: int, currency: str) -> str:
     return f"{fmt(low, currency)} – {fmt(high, currency)}"
 
 
+# ── Gauge SVG ──────────────────────────────────────────────────────────────────
+
+def _gauge_svg(pct: int, color: str) -> str:
+    import math
+
+    cx, cy, r = 100, 100, 68
+    sw = 13  # track stroke width
+
+    def pt(p: float, rad: float = r):
+        a = math.radians(180 - p * 1.8)
+        return round(cx + rad * math.cos(a), 2), round(cy - rad * math.sin(a), 2)
+
+    s    = pt(0)    # left  (32, 100)
+    e    = pt(100)  # right (168, 100)
+    b60  = pt(60)
+    b80  = pt(80)
+    tip  = pt(pct, r - 22)   # needle tip
+    mid  = pt(50)             # top of arc — used for pct==100 path
+
+    # Active arc (always large-arc=0 since pct*1.8 ≤ 180°)
+    if pct <= 0:
+        active = ""
+    elif pct >= 100:
+        active = (
+            f'<path d="M {s[0]} {s[1]} A {r} {r} 0 0 1 {mid[0]} {mid[1]} '
+            f'A {r} {r} 0 0 1 {e[0]} {e[1]}" fill="none" stroke="{color}" '
+            f'stroke-width="{sw + 2}" stroke-linecap="round" opacity="0.9"/>'
+        )
+    else:
+        ax, ay = pt(pct)
+        active = (
+            f'<path d="M {s[0]} {s[1]} A {r} {r} 0 0 1 {ax} {ay}" fill="none" '
+            f'stroke="{color}" stroke-width="{sw + 2}" stroke-linecap="round" opacity="0.9"/>'
+        )
+
+    # Tick marks at 0%, 25%, 50%, 75%, 100%
+    ticks = ""
+    for tp in [0, 25, 50, 75, 100]:
+        ox, oy = pt(tp, r + 6)
+        ix, iy = pt(tp, r - 1)
+        ticks += f'<line x1="{ox}" y1="{oy}" x2="{ix}" y2="{iy}" stroke="white" stroke-width="1.5" stroke-linecap="round"/>'
+
+    return f"""
+<svg viewBox="0 0 200 130" xmlns="http://www.w3.org/2000/svg"
+     style="width:200px;height:auto;display:block;margin:0 auto">
+
+  <!-- Background track -->
+  <path d="M {s[0]} {s[1]} A {r} {r} 0 0 1 {e[0]} {e[1]}"
+        fill="none" stroke="#f1f5f9" stroke-width="{sw + 4}" stroke-linecap="round"/>
+
+  <!-- Zone arcs (dimmed) -->
+  <path d="M {s[0]} {s[1]} A {r} {r} 0 0 1 {b60[0]} {b60[1]}"
+        fill="none" stroke="#fca5a5" stroke-width="{sw}" stroke-linecap="butt" opacity="0.5"/>
+  <path d="M {b60[0]} {b60[1]} A {r} {r} 0 0 1 {b80[0]} {b80[1]}"
+        fill="none" stroke="#fcd34d" stroke-width="{sw}" stroke-linecap="butt" opacity="0.5"/>
+  <path d="M {b80[0]} {b80[1]} A {r} {r} 0 0 1 {e[0]} {e[1]}"
+        fill="none" stroke="#6ee7b7" stroke-width="{sw}" stroke-linecap="round" opacity="0.5"/>
+
+  <!-- Active fill -->
+  {active}
+
+  <!-- Tick marks -->
+  {ticks}
+
+  <!-- Needle shadow -->
+  <line x1="100" y1="102" x2="{tip[0] + 1}" y2="{tip[1] + 1}"
+        stroke="rgba(0,0,0,0.12)" stroke-width="3" stroke-linecap="round"/>
+  <!-- Needle -->
+  <line x1="100" y1="100" x2="{tip[0]}" y2="{tip[1]}"
+        stroke="#1e293b" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- Hub -->
+  <circle cx="100" cy="100" r="8" fill="#1e293b"/>
+  <circle cx="100" cy="100" r="4" fill="white"/>
+
+  <!-- Value + label -->
+  <text x="100" y="88" text-anchor="middle"
+        font-family="DM Mono,monospace" font-size="17" font-weight="500" fill="#0f1a35">{pct}%</text>
+  <text x="100" y="124" text-anchor="middle"
+        font-family="DM Sans,sans-serif" font-size="7.5" letter-spacing="2.5" fill="#94a3b8">CONFIDENCE</text>
+
+  <!-- Zone labels -->
+  <text x="{s[0] + 2}" y="116" text-anchor="middle"
+        font-family="DM Sans,sans-serif" font-size="7" font-weight="700" fill="#ef4444">LOW</text>
+  <text x="{mid[0]}" y="26" text-anchor="middle"
+        font-family="DM Sans,sans-serif" font-size="7" font-weight="700" fill="#f59e0b">MED</text>
+  <text x="{e[0] - 2}" y="116" text-anchor="middle"
+        font-family="DM Sans,sans-serif" font-size="7" font-weight="700" fill="#10b981">HIGH</text>
+
+</svg>"""
+
+
 # ── Page CSS ───────────────────────────────────────────────────────────────────
 
 st.markdown("""
@@ -283,19 +375,19 @@ def display_results(estimate) -> None:
 
   {equity_html}
 
-  <!-- Confidence bar -->
-  <div style="border-top:1.5px solid #f1f5f9; padding-top:1.2rem">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.45rem">
-      <span style="font-size:0.62rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase;
-                   color:#94a3b8; font-family:'DM Sans',sans-serif">Confidence</span>
-      <span style="font-family:'DM Mono',monospace; font-size:0.72rem; color:{fg}">{estimate.confidence_pct}%</span>
+  <!-- Confidence gauge -->
+  <div style="border-top:1.5px solid #f1f5f9; padding-top:1.4rem; display:flex;
+              align-items:flex-start; gap:1.5rem; flex-wrap:wrap">
+    <div style="flex-shrink:0">
+      {_gauge_svg(estimate.confidence_pct, fg)}
     </div>
-    <div style="height:5px; background:#f1f5f9; border-radius:100px; overflow:hidden; margin-bottom:0.65rem">
-      <div style="height:100%; width:{estimate.confidence_pct}%; background:{fg}; border-radius:100px; opacity:0.8"></div>
-    </div>
-    <div style="font-size:0.78rem; color:#64748b; line-height:1.6; font-style:italic;
-                font-family:'DM Sans',sans-serif">
-      {estimate.confidence_rationale}
+    <div style="flex:1; min-width:160px; padding-top:0.5rem">
+      <div style="font-size:0.62rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase;
+                  color:#94a3b8; font-family:'DM Sans',sans-serif; margin-bottom:0.5rem">Analysis</div>
+      <div style="font-size:0.82rem; color:#475569; line-height:1.65; font-style:italic;
+                  font-family:'DM Sans',sans-serif">
+        {estimate.confidence_rationale}
+      </div>
     </div>
   </div>
 
