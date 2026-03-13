@@ -458,10 +458,15 @@ def display_results(estimate) -> None:
 
 # ── Tabs ───────────────────────────────────────────────────────────────────────
 
+# Counter-based keys: incrementing forces Streamlit to treat widgets as new (blank)
+if "jd_v" not in st.session_state:
+    st.session_state["jd_v"] = 0
+if "profile_v" not in st.session_state:
+    st.session_state["profile_v"] = 0
+
 tab1, tab2 = st.tabs(["Job Description", "Candidate Profile"])
 
 with tab1:
-    # Context image strip
     st.markdown("""
     <div style="display:flex; align-items:center; gap:1rem; background:#ffffff; border:1.5px solid #e8eef8;
                 border-radius:10px; padding:0.85rem 1rem; margin-bottom:1.5rem;
@@ -482,21 +487,22 @@ with tab1:
     </div>
     """, unsafe_allow_html=True)
 
+    v = st.session_state["jd_v"]
     jd_url = st.text_input(
         "Job posting URL",
         placeholder="https://boards.greenhouse.io/...   or   https://www.linkedin.com/jobs/view/...",
-        key="jd_url",
+        key=f"jd_url_{v}",
     )
     jd_text = st.text_area(
         "Or paste the job description",
         height=180,
         placeholder="Paste the full job description here if you don't have a URL...",
-        key="jd_input",
+        key=f"jd_input_{v}",
     )
     jd_location = st.text_input(
         "Location",
         placeholder="e.g. London, UK  ·  San Francisco, CA  ·  Remote (US) — leave blank to auto-detect",
-        key="jd_location",
+        key=f"jd_location_{v}",
     )
 
     btn_col, clear_col = st.columns([4, 1])
@@ -506,9 +512,7 @@ with tab1:
         clear_jd = st.button("Clear", key="jd_clear", use_container_width=True)
 
     if clear_jd:
-        st.session_state["jd_url"] = ""
-        st.session_state["jd_input"] = ""
-        st.session_state["jd_location"] = ""
+        st.session_state["jd_v"] += 1
         st.session_state.pop("jd_result", None)
         st.rerun()
 
@@ -556,21 +560,22 @@ with tab2:
     </div>
     """, unsafe_allow_html=True)
 
+    pv = st.session_state["profile_v"]
     profile_url = st.text_input(
         "LinkedIn profile URL",
         placeholder="https://www.linkedin.com/in/...",
-        key="profile_url",
+        key=f"profile_url_{pv}",
     )
     profile_text = st.text_area(
         "Or paste the candidate profile / CV",
         height=180,
         placeholder="Paste LinkedIn profile text, CV, or employment history here if you don't have a URL...",
-        key="profile_input",
+        key=f"profile_input_{pv}",
     )
     profile_location = st.text_input(
         "Location",
         placeholder="e.g. New York, NY  ·  Dublin, Ireland  ·  leave blank to auto-detect",
-        key="profile_location",
+        key=f"profile_location_{pv}",
     )
 
     btn_col2, clear_col2 = st.columns([4, 1])
@@ -580,9 +585,7 @@ with tab2:
         clear_profile = st.button("Clear", key="profile_clear", use_container_width=True)
 
     if clear_profile:
-        st.session_state["profile_url"] = ""
-        st.session_state["profile_input"] = ""
-        st.session_state["profile_location"] = ""
+        st.session_state["profile_v"] += 1
         st.session_state.pop("profile_result", None)
         st.rerun()
 
