@@ -114,19 +114,27 @@ def _fetch_with_playwright(url: str) -> str:
         except PWTimeout:
             pass  # Partial load is often enough
 
-        # Detect login wall and authenticate if needed
-        if _needs_login(page.url):
+        # Wait for any post-navigation redirects to settle before touching the DOM
+        try:
+            page.wait_for_load_state("networkidle", timeout=8_000)
+        except PWTimeout:
+            pass
+
+        # Detect login wall — by URL or by page content (LinkedIn React soft-nav)
+        if _needs_login(page.url) or _page_is_login_wall(page):
+            # Stale cookies are the most common cause — clear them and start fresh
+            if _COOKIES_FILE.exists():
+                _COOKIES_FILE.unlink()
+            context.clear_cookies()
             _linkedin_login(page, context)
             try:
                 page.goto(url, wait_until="load", timeout=30_000)
             except PWTimeout:
                 pass
-
-        # Wait for any post-navigation redirects to settle before touching the DOM
-        try:
-            page.wait_for_load_state("networkidle", timeout=8_000)
-        except PWTimeout:
-            pass  # Acceptable — proceed with whatever has loaded
+            try:
+                page.wait_for_load_state("networkidle", timeout=8_000)
+            except PWTimeout:
+                pass
 
         # Scroll to trigger lazy-loaded sections; avoid page.evaluate during navigation
         for _ in range(3):
@@ -137,13 +145,32 @@ def _fetch_with_playwright(url: str) -> str:
             page.wait_for_timeout(1_200)
 
         text = _extract_linkedin_text(page, url)
+
+        # Final guard: if we still got a login page, raise a clear error
+        if _page_is_login_wall(page):
+            browser.close()
+            raise RuntimeError(
+                "LinkedIn authentication failed. Check LINKEDIN_EMAIL and LINKEDIN_PASSWORD in your .env file."
+            )
+
         browser.close()
 
     return text
 
 
 def _needs_login(current_url: str) -> bool:
-    return any(x in current_url for x in ("login", "authwall", "checkpoint"))
+    return any(x in current_url for x in ("login", "authwall", "checkpoint", "signup"))
+
+
+def _page_is_login_wall(page) -> bool:
+    """Detect auth walls that don't change the URL (LinkedIn React soft-nav)."""
+    try:
+        body = page.inner_text("body")
+        indicators = ["Sign in", "Join now", "Email or phone", "Password", "sign in to LinkedIn"]
+        matches = sum(1 for ind in indicators if ind.lower() in body.lower())
+        return matches >= 2
+    except Exception:
+        return False
 
 
 def _linkedin_login(page, context) -> None:
