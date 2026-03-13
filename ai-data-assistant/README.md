@@ -4,20 +4,29 @@
 
 AI engineering is fundamentally about integrating pre-trained models into workflows that deliver business value. This project demonstrates that pattern end-to-end in a data engineering context:
 
-```
-Input (SQL / question)
-    │
-    ▼
-Prompt Engineering Layer   ← system prompts, few-shot examples
-    │
-    ▼
-LLM API (Claude Opus 4.6)  ← streaming, multi-turn, structured output
-    │
-    ▼
-Structured Output           ← validated Pydantic models, YAML, review feedback
-    │
-    ▼
-Action (fix SQL / publish docs / answer question)
+```mermaid
+flowchart LR
+    A[".sql file / user question"] --> B
+
+    subgraph B["Prompt Engineering Layer"]
+        direction TB
+        B1["System Prompt\n(persona + rules)"]
+        B2["Few-Shot Examples\n(show expected format)"]
+        B3["Structured Output Schema\n(Pydantic model)"]
+    end
+
+    B --> C["Claude Opus 4.6\nAnthropic API"]
+
+    C --> D
+
+    subgraph D["Output"]
+        direction TB
+        D1["Streamed review\n(sql reviewer)"]
+        D2["Validated YAML\n(doc generator)"]
+        D3["Conversational reply\n(chat)"]
+    end
+
+    D --> E["Action\nFix SQL · Publish docs · Answer question"]
 ```
 
 ### Core AI engineering skills demonstrated
@@ -44,6 +53,13 @@ A command-line tool for data engineers with three AI-powered features.
 ### 1. `review` — SQL code reviewer
 
 Takes any `.sql` file and streams a code review flagging performance issues, correctness bugs, dbt convention violations, and style problems — each with a severity and a concrete fix.
+
+```mermaid
+flowchart LR
+    A["fct_orders.sql"] --> B["System Prompt\nSQL_REVIEWER_SYSTEM\n(persona + severity format)"]
+    B --> C["Claude API\nstreaming"]
+    C --> D["Streamed text\n[HIGH] / [MEDIUM] / [LOW]\neach with a fix"]
+```
 
 ```bash
 python main.py review examples/fct_orders.sql
@@ -85,6 +101,15 @@ group by 1, 2, 3, 4, 7, 8
 ### 2. `docs` — dbt documentation generator
 
 Takes a SQL model and generates a ready-to-use `schema.yml` file with column descriptions and recommended dbt tests. Uses few-shot prompting to enforce consistent output format, and Pydantic to validate the result before printing.
+
+```mermaid
+flowchart LR
+    A["dim_customers.sql"] --> B
+    F["Few-Shot Example\n(fct_orders worked answer)"] --> B
+    B["DOC_GENERATOR_SYSTEM\nprompt + schema instructions"] --> C["Claude API\nsingle call"]
+    C --> D["Pydantic\nModelDoc validation"]
+    D --> E["schema.yml\nready to commit"]
+```
 
 ```bash
 python main.py docs examples/dim_customers.sql --model dim_customers
@@ -142,6 +167,16 @@ models:
 ### 3. `chat` — interactive data engineering assistant
 
 A multi-turn conversational assistant with full conversation history. Ask anything about SQL, dbt, Snowflake, Airflow, or Prefect — it remembers context across turns.
+
+```mermaid
+flowchart LR
+    A["User message"] --> B["Append to\nconversation history"]
+    B --> C["CHAT_SYSTEM prompt\n+ full history"]
+    C --> D["Claude API\nstreaming"]
+    D --> E["Streamed reply"]
+    E --> F["Append reply\nto history"]
+    F -->|"next turn"| A
+```
 
 ```bash
 python main.py chat
