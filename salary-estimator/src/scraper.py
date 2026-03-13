@@ -110,18 +110,30 @@ def _fetch_with_playwright(url: str) -> str:
         page = context.new_page()
 
         try:
-            page.goto(url, wait_until="domcontentloaded", timeout=30_000)
+            page.goto(url, wait_until="load", timeout=30_000)
         except PWTimeout:
             pass  # Partial load is often enough
 
         # Detect login wall and authenticate if needed
         if _needs_login(page.url):
             _linkedin_login(page, context)
-            page.goto(url, wait_until="domcontentloaded", timeout=30_000)
+            try:
+                page.goto(url, wait_until="load", timeout=30_000)
+            except PWTimeout:
+                pass
 
-        # Scroll to trigger lazy-loaded sections
+        # Wait for any post-navigation redirects to settle before touching the DOM
+        try:
+            page.wait_for_load_state("networkidle", timeout=8_000)
+        except PWTimeout:
+            pass  # Acceptable — proceed with whatever has loaded
+
+        # Scroll to trigger lazy-loaded sections; avoid page.evaluate during navigation
         for _ in range(3):
-            page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+            try:
+                page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+            except Exception:
+                page.keyboard.press("End")  # fallback that needs no JS context
             page.wait_for_timeout(1_200)
 
         text = _extract_linkedin_text(page, url)
