@@ -100,7 +100,33 @@ _SALARY_SCHEMA = {
 
 # ── Prompts ────────────────────────────────────────────────────────────────────
 
-_JOB_DESCRIPTION_SYSTEM = """You are a compensation benchmarking expert with deep knowledge of salary \
+_CONFIDENCE_RUBRIC = """
+CONFIDENCE SCORING — use a points-based approach. Do NOT default to 70-75%.
+
+Start at 50 points (no usable information), then add or subtract:
+
+ADD points:
+  +20  Role is high-volume and well-documented (SWE, PM, sales, marketing, finance, ops, HR, legal)
+  +15  Major metro with abundant public salary data (NYC, SF/Bay Area, Seattle, London, Dublin,
+       Amsterdam, Berlin, Paris, Sydney, Singapore, Toronto, Austin, Boston, Chicago, LA)
+  +10  Seniority is unambiguous (explicit level e.g. "L5", "VP", "Senior", or clear years range ≤2 yrs)
+  +8   Industry has transparent comp culture (tech, finance, consulting, law, pharma)
+  +7   Company type is identifiable (named enterprise, known FAANG-tier, or stated funding stage)
+
+SUBTRACT points:
+  -15  Seniority is ambiguous (broad range like "3–10 years", generic title like "Specialist")
+  -10  Mid-tier or regional city (not a globally recognised tech/finance hub)
+  -10  Niche specialisation with few public comparables
+  -8   Industry with opaque comp norms (gov, non-profit, early-stage, creative industries)
+  -8   Location missing entirely
+  -5   Equity structure is unclear or startup stage unknown
+
+Cap at 95. Floor at 40. Round to the nearest whole number.
+Most real inputs score between 52 and 89 — scores above 90 should be rare.
+State your arithmetic in confidence_rationale (e.g. "50 +20 +15 +10 −8 = 87")."""
+
+
+_JOB_DESCRIPTION_SYSTEM = f"""You are a compensation benchmarking expert with deep knowledge of salary \
 data across industries, roles, and geographies. You draw on aggregated data from \
 Glassdoor, LinkedIn Salary, Levels.fyi, Payscale, Radford, and industry surveys.
 
@@ -111,14 +137,12 @@ Analyse the job description and estimate the salary range for the role. Consider
 - Industry vertical and company type (startup / scale-up / enterprise / FAANG-tier)
 - Typical total comp structures for this sector (base / bonus / equity norms)
 
-Set confidence_pct based on data availability:
-- 85–95 %: Common roles (SWE, finance, sales, marketing) in major cities with abundant public data
-- 65–84 %: Moderate data availability, niche-ish location, or ambiguous seniority
-- 40–64 %: Highly specialised roles, smaller markets, or very limited comparable data
+{_CONFIDENCE_RUBRIC}
 
 Return all salary figures in whole numbers (no cents). Use the local currency for the location."""
 
-_CANDIDATE_PROFILE_SYSTEM = """You are a senior talent acquisition specialist and compensation \
+
+_CANDIDATE_PROFILE_SYSTEM = f"""You are a senior talent acquisition specialist and compensation \
 benchmarking expert. You help recruiters estimate what a candidate is likely earning \
 before extending an offer.
 
@@ -130,10 +154,7 @@ Analyse the employment history and estimate the candidate's current salary. Cons
 - Career progression and trajectory
 - Skills, specialisations, and industry niche
 
-Set confidence_pct based on the quality of available information:
-- 85–95 %: Clear title, well-known company, common role type, stated location
-- 65–84 %: Some ambiguity in level, company comp norms unclear, or regional data gaps
-- 40–64 %: Sparse history, unusual career path, or very niche specialisation
+{_CONFIDENCE_RUBRIC}
 
 Return all salary figures in whole numbers (no cents). Use the local currency for the location."""
 
