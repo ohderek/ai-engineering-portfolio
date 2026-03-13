@@ -45,10 +45,6 @@ flowchart LR
 | Output validation | Pydantic v2 — guaranteed schema compliance, no string parsing |
 | Agentic patterns | Stateful multi-turn chat with full conversation history |
 
-### Why not LangChain?
-
-LangChain is a popular abstraction layer for chaining LLM calls, but for focused use cases like this it adds complexity without much benefit. This project uses the **Anthropic SDK directly** — giving full visibility into every API call, prompt, and response. That's intentional: understanding what's happening at the SDK level is the foundation before layering on frameworks like LangChain or LlamaIndex. Both are worth knowing; the raw SDK is where to start.
-
 ---
 
 ## What it does

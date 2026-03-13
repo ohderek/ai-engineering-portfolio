@@ -36,11 +36,31 @@ Structured Output           ← validated Pydantic models, YAML, review feedback
 
 ---
 
+### [support-rag-bot](./support-rag-bot)
+
+A Retrieval-Augmented Generation (RAG) pipeline that turns any business document into a queryable support bot. Ingests a document once, then answers plain-English questions grounded in the document content.
+
+**Features:**
+- `ingest` — Load, chunk, embed, and store a document in a local vector database
+- `ask` — Ask a single question with optional source chunk citations
+- `chat` — Interactive Q&A session against the ingested document
+
+**Key techniques:** document chunking · local embeddings (HuggingFace) · vector store (Chroma) · RAG · LangChain LCEL · prompt templates
+
+**Runs with:** Anthropic API for the LLM; HuggingFace embeddings run locally (no key needed)
+
+→ [README](./support-rag-bot/README.md)
+
+---
+
 ## Stack
 
 | Layer | Tools |
 |-------|-------|
 | LLM APIs | Anthropic (Claude), Ollama (Llama, CodeLlama) |
+| Orchestration | LangChain (LCEL, retrievers, prompt templates) |
+| Embeddings | HuggingFace `all-MiniLM-L6-v2` (local) |
+| Vector store | Chroma (local, open source) |
 | Validation | Pydantic v2 |
 | CLI | Typer |
 | Terminal UI | Rich |

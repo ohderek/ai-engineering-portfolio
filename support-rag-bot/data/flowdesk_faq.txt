@@ -1,0 +1,95 @@
+FlowDesk — Product FAQ & Support Documentation
+
+== GETTING STARTED ==
+
+What is FlowDesk?
+FlowDesk is a project management platform designed for remote teams. It combines task tracking, team messaging, and file sharing in a single workspace. Teams can create projects, assign tasks, set deadlines, and track progress through customisable dashboards.
+
+How do I create an account?
+Visit app.flowdesk.io and click "Sign up". You can register with a work email or sign in with Google or Microsoft. After verifying your email, you will be prompted to create or join a workspace.
+
+What is a workspace?
+A workspace is your team's private environment inside FlowDesk. It contains all your projects, members, and settings. You can belong to multiple workspaces — for example, one for your full-time job and one for a side project.
+
+How do I invite team members?
+Go to Settings > Members > Invite. Enter the email addresses of your colleagues and assign them a role: Admin, Member, or Viewer. Invites expire after 7 days. Admins can resend expired invites from the same page.
+
+== PLANS & BILLING ==
+
+What plans are available?
+FlowDesk offers three plans:
+- Starter (free): Up to 5 members, 3 active projects, 1 GB storage.
+- Pro ($12/user/month): Unlimited projects, 50 GB storage, priority support, advanced reporting.
+- Enterprise (custom pricing): SSO, audit logs, dedicated account manager, SLA guarantees.
+
+Can I try Pro before paying?
+Yes. Every new workspace automatically starts on a 14-day Pro trial. No credit card required. At the end of the trial, the workspace downgrades to Starter unless you add a payment method.
+
+How does billing work?
+Billing is per seat, charged monthly or annually. Annual billing gives a 20% discount. You are billed on the first of each month for the number of active seats in your workspace. Deactivated users are not billed.
+
+How do I cancel my subscription?
+Go to Settings > Billing > Cancel Plan. Your workspace will retain Pro features until the end of the current billing period, then revert to Starter. Data is never deleted on cancellation.
+
+Can I get a refund?
+We offer a full refund within 7 days of the first charge if you have not exceeded Starter plan limits during that period. Contact billing@flowdesk.io for refund requests.
+
+== TASKS & PROJECTS ==
+
+How do I create a project?
+Click "+ New Project" in the left sidebar. Give your project a name, set a default view (Board, List, or Timeline), and optionally set a start and end date. You can change the view at any time.
+
+What task views are available?
+FlowDesk supports four task views:
+- Board: Kanban-style columns (To Do, In Progress, Done, or custom statuses).
+- List: Spreadsheet-style view with sorting and filtering.
+- Timeline: Gantt chart view showing task dependencies.
+- Calendar: Monthly calendar view based on due dates.
+
+How do I set task dependencies?
+In Timeline view, hover over a task and drag the right edge to another task to create a dependency link. Dependent tasks will be blocked until their predecessors are marked complete. You can also set dependencies from the task detail panel under "Depends on".
+
+Can I assign a task to multiple people?
+Yes. Open the task, click the assignee field, and select multiple members. All assignees will receive notifications for updates on that task.
+
+How do I set recurring tasks?
+Open a task, click "Recurrence" in the detail panel, and choose a frequency: daily, weekly, monthly, or custom. When a recurring task is marked complete, a new copy is automatically created for the next occurrence.
+
+== NOTIFICATIONS & INTEGRATIONS ==
+
+How do I control notifications?
+Go to Settings > Notifications. You can set preferences per workspace and per project — for example, receiving email digests instead of real-time alerts for low-priority projects. You can also mute individual tasks.
+
+What integrations does FlowDesk support?
+FlowDesk integrates with: Slack (task notifications in channels), GitHub (link commits and PRs to tasks), Google Drive and Dropbox (attach files directly to tasks), Zoom (create meeting links from task comments), and Zapier (connect to 5,000+ apps).
+
+How do I connect Slack?
+Go to Settings > Integrations > Slack and click "Connect". Authorise the FlowDesk app in your Slack workspace. You can then choose which projects send notifications to which Slack channels.
+
+== SECURITY & DATA ==
+
+Where is my data stored?
+FlowDesk stores data in AWS data centres in the US East region by default. Enterprise customers can request EU data residency (Frankfurt region) for an additional fee.
+
+Does FlowDesk support SSO?
+SSO via SAML 2.0 is available on the Enterprise plan. We support Okta, Azure AD, and Google Workspace as identity providers. Contact sales@flowdesk.io to set up SSO.
+
+How do I export my data?
+Go to Settings > Data > Export. You can export all projects and tasks as CSV or JSON. Exports are available to Admins only and are processed within 24 hours. A download link is emailed to the requesting Admin.
+
+What happens to my data if I delete my workspace?
+Workspace data is retained for 30 days after deletion, after which it is permanently removed from our servers. Admins can restore a deleted workspace within this 30-day window by contacting support@flowdesk.io.
+
+== TROUBLESHOOTING ==
+
+Why can't I log in?
+First, check that you are using the correct email address. If you use Google or Microsoft SSO, click the relevant button instead of entering a password. If you have forgotten your password, click "Forgot password" on the login page. If your account has been deactivated by an Admin, contact your workspace Admin.
+
+Why are my notifications not arriving?
+Check your notification settings under Settings > Notifications. Also check your email spam folder. If you use Slack notifications, verify the integration is still connected under Settings > Integrations. Notification delivery can be delayed by up to 5 minutes during peak hours.
+
+How do I report a bug?
+Click the "?" icon in the bottom-left corner of the app and select "Report a bug". Include a description of what you expected to happen and what actually happened, along with any error messages. Screenshots can be attached directly in the report form.
+
+What is the uptime SLA?
+The Pro plan includes 99.9% uptime. The Enterprise plan includes 99.99% uptime with a dedicated status page and incident response within 1 hour. Current status is available at status.flowdesk.io.
