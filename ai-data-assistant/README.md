@@ -37,20 +37,137 @@ LangChain is a popular abstraction layer for chaining LLM calls, but for focused
 
 ## What it does
 
-A command-line tool for data engineers with three AI-powered features:
+A command-line tool for data engineers with three AI-powered features.
 
-**`review`** — Stream a code review of any SQL model, flagging performance issues, correctness bugs, and style violations.
+---
 
-**`docs`** — Generate `schema.yml` dbt documentation from a SQL file using few-shot examples and structured output (Pydantic).
+### 1. `review` — SQL code reviewer
 
-**`chat`** — Multi-turn interactive assistant for SQL, dbt, Snowflake, Airflow, and Prefect questions.
+Takes any `.sql` file and streams a code review flagging performance issues, correctness bugs, dbt convention violations, and style problems — each with a severity and a concrete fix.
+
+```bash
+python main.py review examples/fct_orders.sql
+```
+
+**Input** (`examples/fct_orders.sql`):
+```sql
+select
+    o.order_id,
+    o.customer_id,
+    o.created_at,
+    o.status,
+    sum(i.quantity * i.unit_price) as revenue,
+    count(*) as line_items,
+    c.country,
+    c.plan_type
+from orders o
+join order_items i on o.order_id = i.order_id
+join customers c on o.customer_id = c.customer_id
+where o.status != 'cancelled'
+group by 1, 2, 3, 4, 7, 8
+```
+
+**Output:**
+```
+[HIGH] Raw table names bypass the dbt DAG — orders, order_items, customers should use
+  ref() macros so dbt can build the dependency graph correctly.
+  Fix: replace `from orders` with `from {{ ref('stg_orders') }}`
+
+[MEDIUM] Positional GROUP BY (1, 2, 3...) breaks silently if columns are reordered.
+  Fix: name each column explicitly — GROUP BY o.order_id, o.customer_id, ...
+
+[LOW] != 'cancelled' excludes NULL status rows, which may be unintentional.
+  Fix: WHERE status NOT IN ('cancelled') OR status IS NULL
+```
+
+---
+
+### 2. `docs` — dbt documentation generator
+
+Takes a SQL model and generates a ready-to-use `schema.yml` file with column descriptions and recommended dbt tests. Uses few-shot prompting to enforce consistent output format, and Pydantic to validate the result before printing.
+
+```bash
+python main.py docs examples/dim_customers.sql --model dim_customers
+```
+
+**Input** (`examples/dim_customers.sql`):
+```sql
+with source as (
+    select * from {{ source('app_db', 'customers') }}
+),
+cleaned as (
+    select
+        customer_id,
+        lower(trim(email))              as email,
+        coalesce(first_name, 'Unknown') as first_name,
+        last_name,
+        country_code,
+        plan_type,
+        created_at,
+        updated_at,
+        case when deleted_at is not null then true else false end as is_deleted
+    from source
+    where customer_id is not null
+)
+select * from cleaned
+```
+
+**Output:**
+```yaml
+version: 2
+
+models:
+  - name: dim_customers
+    description: One row per customer with cleaned and normalised contact fields.
+    columns:
+      - name: customer_id
+        description: Unique identifier for each customer.
+        tests:
+          - unique
+          - not_null
+      - name: email
+        description: Lowercased and trimmed customer email address.
+      - name: first_name
+        description: Customer first name, defaulting to 'Unknown' when null.
+      - name: country_code
+        description: ISO country code for the customer.
+      - name: plan_type
+        description: Subscription plan the customer is on.
+      - name: is_deleted
+        description: True if the customer record has been soft-deleted.
+```
+
+---
+
+### 3. `chat` — interactive data engineering assistant
+
+A multi-turn conversational assistant with full conversation history. Ask anything about SQL, dbt, Snowflake, Airflow, or Prefect — it remembers context across turns.
+
+```bash
+python main.py chat
+```
+
+**Example session:**
+```
+You: what's the difference between a dbt source and a ref?
+Assistant: source() points to raw tables outside your dbt project — usually your
+           landing zone or ingestion layer. ref() points to models inside your
+           project and is how dbt builds the DAG. Rule of thumb: if you didn't
+           write the SQL for it, use source().
+
+You: so where should I put source definitions?
+
+Assistant: In a sources.yml file inside the models/ directory of the relevant
+           domain — e.g. models/staging/sources.yml. One sources.yml per schema
+           keeps things easy to find.
+```
 
 ---
 
 ## Prompt engineering techniques
 
 ### 1. System prompts (`src/prompts.py`)
-Each feature has a tailored system prompt that gives the model a persona and explicit output rules — the single highest-leverage prompt engineering technique.
+Each feature has a tailored system prompt that gives the model a persona and explicit output rules.
 
 ```python
 SQL_REVIEWER_SYSTEM = """You are a senior data engineer specializing in SQL best practices...
@@ -58,17 +175,18 @@ Format your feedback as numbered issues with severity [HIGH / MEDIUM / LOW]...""
 ```
 
 ### 2. Few-shot examples (`src/doc_generator.py`)
-Before the real SQL is sent, the model sees a worked example of exactly the output format we want. This dramatically reduces hallucinations and format drift.
+Before the real SQL is sent, the model sees a worked example of exactly the output format we want.
+This dramatically reduces hallucinations and format drift.
 
 ```python
 messages = [
-    *FEW_SHOT_DOC_EXAMPLES,   # show Claude what "good" looks like first
+    *FEW_SHOT_DOC_EXAMPLES,   # show Claude what 'good' looks like first
     {"role": "user", "content": f"Generate docs for:\n{sql}"},
 ]
 ```
 
 ### 3. Structured outputs (`src/doc_generator.py`)
-Using `client.messages.parse()` with a Pydantic model guarantees the response matches our schema — no string parsing, no surprises.
+Using `client.messages.parse()` with a Pydantic model guarantees the response matches our schema.
 
 ```python
 class ModelDoc(BaseModel):
@@ -85,59 +203,13 @@ doc: ModelDoc = response.parsed_output  # fully validated
 
 ## Setup
 
+See [SETUP.md](./SETUP.md) for full instructions including the Ollama (open source) option.
+
 ```bash
-git clone https://github.com/dereko/ai-data-assistant
-cd ai-data-assistant
+git clone https://github.com/ohderek/ai-engineering-portfolio
+cd ai-engineering-portfolio/ai-data-assistant
 pip install -r requirements.txt
 cp .env.example .env  # add your ANTHROPIC_API_KEY
-```
-
-## Usage
-
-```bash
-# Review a SQL file for issues
-python main.py review examples/fct_orders.sql
-
-# Generate dbt schema.yml documentation
-python main.py docs examples/dim_customers.sql --model dim_customers
-
-# Start an interactive chat session
-python main.py chat
-```
-
-### Example: SQL review output
-
-```
-Reviewing: fct_orders
-
-[HIGH] Missing dbt ref() macros — raw table names (orders, customers) bypass dbt's DAG.
-  Fix: replace `from orders` with `from {{ ref('stg_orders') }}`
-
-[MEDIUM] GROUP BY uses positional references (1,2,3...) — breaks silently if columns reorder.
-  Fix: name each column explicitly in GROUP BY
-
-[LOW] status filter uses != which excludes NULLs — may drop rows unintentionally.
-  Fix: use `status not in ('cancelled') or status is null`
-```
-
----
-
-## Key API patterns used
-
-```python
-# Streaming (src/client.py)
-with client.messages.stream(model=MODEL, ...) as stream:
-    for text in stream.text_stream:
-        print(text, end="", flush=True)
-
-# Structured output (src/doc_generator.py)
-response = client.messages.parse(model=MODEL, ..., output_format=ModelDoc)
-doc = response.parsed_output
-
-# Multi-turn conversation (src/chat.py)
-history.append({"role": "user", "content": user_input})
-response = client.messages.create(model=MODEL, messages=history, ...)
-history.append({"role": "assistant", "content": response_text})
 ```
 
 ---
