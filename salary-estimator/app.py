@@ -368,6 +368,8 @@ def display_results(estimate) -> None:
     </div>
     <div style="background:{pill_bg}; border:1.5px solid {bar_col}; border-radius:10px;
                 padding:0.45rem 0.9rem; text-align:center; flex-shrink:0; margin-left:1rem">
+      <div style="font-size:0.55rem; color:{fg}; opacity:0.65; letter-spacing:0.1em;
+                  text-transform:uppercase; margin-bottom:0.15rem; font-family:'DM Sans',sans-serif">Confidence</div>
       <div style="font-family:'DM Mono',monospace; font-size:1.1rem; font-weight:500;
                   color:{fg}; line-height:1">{estimate.confidence_pct}%</div>
       <div style="font-size:0.6rem; color:{fg}; opacity:0.8; letter-spacing:0.06em;
